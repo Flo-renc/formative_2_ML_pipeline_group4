@@ -4,6 +4,8 @@ This script processes audio samples, applies augmentations, and extracts feature
 """
 
 import os
+import sys
+import argparse
 import numpy as np
 import pandas as pd
 import librosa
@@ -272,9 +274,14 @@ class AudioProcessor:
         
         return features
     
-    def process_all_samples(self):
+    def process_all_samples(self, show_plots=True):
         """
         Process all audio samples: load, visualize, augment, and extract features.
+        
+        Parameters:
+        -----------
+        show_plots : bool
+            Whether to display plots (default: True)
         """
         audio_files = list(Path(self.audio_dir).glob("*.m4a"))
         audio_files.extend(list(Path(self.audio_dir).glob("*.wav")))
@@ -299,12 +306,18 @@ class AudioProcessor:
             label = audio_file.stem  # Get filename without extension
             
             # Display original waveform
-            print(f"Displaying waveform for: {label}")
-            self.plot_waveform(audio, sr, title=f"Waveform - {label}")
+            if show_plots:
+                print(f"Displaying waveform for: {label}")
+                self.plot_waveform(audio, sr, title=f"Waveform - {label}")
+            else:
+                print(f"Processing waveform for: {label}")
             
             # Display original spectrogram
-            print(f"Displaying spectrogram for: {label}")
-            self.plot_spectrogram(audio, sr, title=f"Spectrogram - {label}")
+            if show_plots:
+                print(f"Displaying spectrogram for: {label}")
+                self.plot_spectrogram(audio, sr, title=f"Spectrogram - {label}")
+            else:
+                print(f"Processing spectrogram for: {label}")
             
             # Extract features from original
             print(f"Extracting features from original: {label}")
@@ -365,15 +378,85 @@ class AudioProcessor:
 
 
 def main():
-    """Main function to run the audio processing pipeline."""
+    """Main function to run the audio processing pipeline with CLI support."""
+    parser = argparse.ArgumentParser(
+        description="Task 3: Sound Data Collection and Processing",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Process audio files with default settings
+  python audio_processing.py
+  
+  # Specify custom audio directory and output file
+  python audio_processing.py --audio-dir "my_audio" --output "my_features.csv"
+  
+  # Process without displaying plots (faster for batch processing)
+  python audio_processing.py --no-plots
+  
+  # Use custom sample rate
+  python audio_processing.py --sample-rate 44100
+        """
+    )
+    
+    parser.add_argument(
+        "--audio-dir",
+        type=str,
+        default="Audio samples",
+        help="Directory containing audio files (default: 'Audio samples')"
+    )
+    
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="audio_features.csv",
+        help="Output CSV file path (default: 'audio_features.csv')"
+    )
+    
+    parser.add_argument(
+        "--sample-rate",
+        type=int,
+        default=22050,
+        help="Target sample rate for audio processing (default: 22050)"
+    )
+    
+    parser.add_argument(
+        "--no-plots",
+        action="store_true",
+        help="Disable plot display (useful for batch processing)"
+    )
+    
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="Task 3: Sound Data Collection and Processing v1.0"
+    )
+    
+    args = parser.parse_args()
+    
+    # Validate audio directory exists
+    if not os.path.exists(args.audio_dir):
+        print(f"Error: Audio directory '{args.audio_dir}' does not exist.")
+        sys.exit(1)
+    
+    # Print configuration
+    print("=" * 60)
+    print("Task 3: Sound Data Collection and Processing")
+    print("=" * 60)
+    print(f"Audio directory: {args.audio_dir}")
+    print(f"Output file: {args.output}")
+    print(f"Sample rate: {args.sample_rate} Hz")
+    print(f"Show plots: {not args.no_plots}")
+    print("=" * 60)
+    print()
+    
     # Initialize processor
-    processor = AudioProcessor(audio_dir="Audio samples", sample_rate=22050)
+    processor = AudioProcessor(audio_dir=args.audio_dir, sample_rate=args.sample_rate)
     
     # Process all audio samples
-    processor.process_all_samples()
+    processor.process_all_samples(show_plots=not args.no_plots)
     
     # Save features to CSV
-    processor.save_features_to_csv("audio_features.csv")
+    processor.save_features_to_csv(args.output)
     
     print("\n" + "=" * 60)
     print("Audio processing complete!")

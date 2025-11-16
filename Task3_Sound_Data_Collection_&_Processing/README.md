@@ -8,17 +8,17 @@ This module processes audio samples, applies augmentations, and extracts feature
 
 ## Features
 
-- ✅ Loads audio samples (supports .m4a, .wav, .mp3 formats)
-- ✅ Displays waveforms and spectrograms for visualization
-- ✅ Applies multiple augmentations per sample:
+- Loads audio samples (supports .m4a, .wav, .mp3 formats)
+- Displays waveforms and spectrograms for visualization
+- Applies multiple augmentations per sample:
   - Pitch shift
   - Time stretch
   - Background noise addition
-- ✅ Extracts audio features:
+- Extracts audio features:
   - MFCCs (13 coefficients)
   - Spectral roll-off
   - Energy (RMS)
-- ✅ Saves features to `audio_features.csv`
+- Saves features to `audio_features.csv`
 
 ## Files
 
@@ -36,18 +36,62 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Option 1: Run Python Script
+### Command-Line Interface (CLI)
+
+The script now supports a full command-line interface with various options:
+
+#### Basic Usage
 
 ```bash
+# Run with default settings (uses "Audio samples" directory)
 python audio_processing.py
 ```
 
-This will:
-- Process all audio files in the `Audio samples/` directory
-- Display waveforms and spectrograms
-- Apply augmentations
-- Extract features
-- Save results to `audio_features.csv`
+#### Available Options
+
+```bash
+# Show help message
+python audio_processing.py --help
+
+# Specify custom audio directory and output file
+python audio_processing.py --audio-dir "my_audio" --output "my_features.csv"
+
+# Process without displaying plots (faster for batch processing)
+python audio_processing.py --no-plots
+
+# Use custom sample rate
+python audio_processing.py --sample-rate 44100
+
+# Combine multiple options
+python audio_processing.py --audio-dir "Audio samples" --output "features.csv" --no-plots --sample-rate 22050
+```
+
+#### Command-Line Arguments
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `--audio-dir` | Directory containing audio files | `"Audio samples"` |
+| `--output` | Output CSV file path | `"audio_features.csv"` |
+| `--sample-rate` | Target sample rate for processing | `22050` |
+| `--no-plots` | Disable plot display (flag) | `False` |
+| `--version` | Show version information | - |
+| `--help` | Show help message | - |
+
+#### Examples
+
+```bash
+# Process with default settings (shows plots)
+python audio_processing.py
+
+# Quick processing without plots
+python audio_processing.py --no-plots
+
+# Custom directory and output
+python audio_processing.py --audio-dir "../my_audio_files" --output "../results/audio_features.csv"
+
+# High-quality processing with custom sample rate
+python audio_processing.py --sample-rate 44100 --output "high_quality_features.csv"
+```
 
 ### Option 2: Use Jupyter Notebook
 
